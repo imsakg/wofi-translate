@@ -1,6 +1,6 @@
-# Rofi translate
+# Wofi translate
 
-Simple rofi script for translation based on [translate shell](https://github.com/soimort/translate-shell)
+Simple wofi script for translation based on [translate shell](https://github.com/soimort/translate-shell)
 
 ## Demo
 
@@ -18,46 +18,54 @@ Provide detail of specific translation
 
 ## Requirement
 
-* [rofi](https://github.com/davatorium/rofi)
+* wofi
 * [translate shell](https://github.com/soimort/translate-shell)
 * mplayer (without it you can't play the audio file)
+* usleep
+* awk
+* sed
+* tac
 
 ### Archlinux
 ``` bash
-sudo pacman -S translate-shell rofi mplayer
+sudo pacman -S translate-shell wofi mplayer
 ```
 
 ## Install
-### Download rofi-translate
+### Download wofi-translate
 ``` bash
-git clone https://github.com/garyparrot/rofi-translate
-cd rofi-translate
+git clone https://github.com/imsakg/wofi-translate.git
+cd woif-translate
 ```
 
 ### Configure environment variables
-Edit `.xprofile`, add the following line.
+Edit `.bashrc`, add the following line.
 ``` bash
-export PATH=~/rofi-translate:$PATH
+export PATH=~/wofi-translate:$PATH
 ```
 
 ### Usage
 
 shell
 ``` bash
-$ rofi_trans
-$ rofi_trans brief
-$ rofi_trans verbose
-$ rofi_trans delete
+$ wofi_trans
+$ wofi_trans brief
+$ wofi_trans verbose
+$ wofi_trans delete
 ```
 
 Add key binding for i3-wm
 ``` plaintext
-bindsym $mod+t exec rofi_trans
+bindsym $mod+t exec wofi_trans
+```
+Add key binding for hyprland
+``` plaintext
+bind = SUPER SHIFT, T, exec, wofi_trans
 ```
 
-### Configuration of rofi-translate
+### Configuration of wofi-translate
 
-Open the file ``rofi_trans`` with your text editor.
+Open the file ``wofi_trans`` with your text editor.
 Then make changes to these environment variables.
 
 ```bash
@@ -69,13 +77,13 @@ function Configs {
     export secondary_translator="bing"
 
     # the file use to storing your translating history.
-    export transHistory="$HOME/.rofi_trans"
+    export transHistory="$HOME/.wofi_trans"
 
     # Directory for cache audio files
-    export transAudioCacheDir="$HOME/.rofi_trans_audio"
+    export transAudioCacheDir="$HOME/.wofi_trans_audio"
 
     # target language for translation
-    export transTarget="zh-TW"
+    export transTarget="en"
 
     # transArgs: Arguement for translate shell
     export transArgs="-b -speak"
@@ -83,7 +91,7 @@ function Configs {
     # display some debug information, run it in shell so you can see it
     export verbose="1"
 
-    # auto refresh the content of each mode after every operation, this will cause the rofi flash(close and open)
+    # auto refresh the content of each mode after every operation, this will cause the wofi flash(close and open)
     export auto_refresh="1"
 
     export version=1

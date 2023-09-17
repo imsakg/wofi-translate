@@ -1,24 +1,22 @@
 #!/usr/bin/env bash
 
 function refresh {
-    sh -c 'sleep 0.05 ; env default="delete" rofi_trans' &
-    pkill -u $USER rofi
+    # sh -c 'sleep 0.05 ; env default="delete" wofi_trans' &
+    pkill -u $USER wofi
 }
 
 # configure
 pattern="$@"
-
 touch $transHistory
 
 # delete pattern
 if [[ -n $pattern ]]; then
-
     # pattern escaping
-    pattern="$(echo "$pattern" | sed -e 's/[]\/$*.^[]/\\&/g' )"
+    pattern="$(echo "$pattern" | sed -e 's/[]\/$*.^[]/\\&/g')"
 
     # remove entry by specified pattern
     his="$(cat $transHistory)"
-    echo "$his" | sed "/^${pattern}$/d" > $transHistory
+    echo "$his" | sed "/^${pattern}$/d" >$transHistory
 
     # Auto refresh content of each script mode
     if [[ "$auto_refresh" == "1" ]]; then

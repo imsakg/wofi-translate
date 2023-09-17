@@ -1,0 +1,18 @@
+#!/usr/bin/bash
+
+# configure
+transArgNoAnsi="-no-ansi"
+
+if [[ $version -lt 1 ]]; then
+    DeprecatedMessage="Calling wofi_verbose directly is not recommend in the new version, consider \"wofi_trans verbose\""
+    # A hacky way to solve the version problem :3
+    printf "$DeprecatedMessage\n"
+    exec wofi_trans verbose
+else
+    input="$(wofi --show dmenu -p translate --lines 0)"
+fi
+
+while [[ -n $input ]]; do
+    result="$(trans --target=$transTarget $transArgNoAnsi "$input")"
+    input="$(wofi -p translate --show dmenu -mesg "$result" --lines 0)"
+done

@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+# TODO: Fix search problem
+
+# This is the entry of rofi trans-shell
+# This script require trans-shell itself, if you don't have one.
+# You can install it from your package manager(if provided) or from source(clone trans-shell from github)
+
+function Configs {
+    # The default translator for translate-shell
+    export primary_translator="google"
+    # The alternative transltor for translate-shell
+    export secondary_translator="bing"
+
+    export transHistory="$HOME/.wofi_trans.history"
+    export transAudioCacheDir="/tmp/.wofi_trans_audio"
+    export transTarget="en"
+    export save_audio="save_audio"
+    export transArgs="-b -speak"
+    export verbose="1"
+    export auto_refresh="1"
+    export version=1
+}
+
+# Setup environment variable for configs.
+Configs
+
+if [[ -z "$default" ]]; then default="brief"; fi
+if [[ "$1" == "verbose" ]]; then default="verbose"; fi
+if [[ "$1" == "brief" ]]; then default="brief"; fi
+if [[ "$1" == "delete" ]]; then default="delete"; fi
+
+if [[ -z "$WOFI_MODE" ]]; then
+    export WOFI_MODE=$(echo -e "verbose: wofi_trans_verbose\nbrief: wofi_trans_brief\ndelete: wofi_trans_delete" | wofi --show dmenu --cache-file=/dev/null -d -p translate)
+    export WOFI_MODE_PATH=$(echo $WOFI_MODE | sed 's/.*://')
+    if [[ -z "$WOFI_MODE" ]]; then
+        exit 0
+    fi
+fi
+
+while true; do
+    WOFI_RESPONSE=$(
+        wofi --show dmenu --cache-file=/dev/null -d -p $WOFI_MODE: <<<$(tac $transHistory)
+    )
+
+    # if wofi_response is empty, exit
+    if [[ -z "$WOFI_RESPONSE" ]]; then
+        exit 0
+    # elif [[ "$WOFI_RESPONSE" == "#"* ]]; then
+    #     # if mode is delete
+    #     if [[ "$WOFI_MODE" == "delete"* ]]; then
+    #         eval "$WOFI_MODE_PATH \"$WOFI_RESPONSE\""
+    #     else
+
+    #         # play cached audio file and call it a day
+    #         CACHED_FILE=$(echo "$WOFI_RESPONSE" | cut -f2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    #         mplayer "$transAudioCacheDir/$CACHED_FILE.mpeg" >/dev/null 2>&1 &
+    #     fi
+    else
+        if [[ "$WOFI_MODE" == "brief"* ]]; then
+
+            # check if the entry exists in history
+
+            input=$(echo "$WOFI_RESPONSE" | cut -f2 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+            pattern="$(echo "$input" | sed -e 's/[]\/$*.^[]/\\&/g')"
+            cat $transHistory | awk -F '\t' 'BEGIN { OFS = FS } { print $2 }' | grep "^${pattern}[[:space:]]*$"
+            entryExist="$?"
+
+            eval "$WOFI_MODE_PATH \"$WOFI_RESPONSE\""
+
+            IS_CACHED=$(ls $transAudioCacheDir | grep "^${input}[[:space:]]*\.mpeg$")
+            # check if the audio file is cached
+            if [[ -n "$IS_CACHED" ]]; then
+                # play cached audio file and call it a day
+                mplayer "$transAudioCacheDir/$input.mpeg" >/dev/null 2>&1 &
+                usleep 100000
+            fi
+
+            pkill -u $USER wofi
+
+        elif [[ "$WOFI_MODE" == "verbose"* ]]; then
+            result=$(eval "$WOFI_MODE_PATH \"$WOFI_RESPONSE\"")
+            echo $result
+
+            wofi --show dmenu --cache-file=/dev/null -d -p $WOFI_MODE <<<$result
+
+            pkill -u $USER wofi
+
+        elif [[ "$WOFI_MODE" == "delete"* ]]; then
+            eval "$WOFI_MODE_PATH \"$WOFI_RESPONSE\""
+        fi
+    fi
+done
